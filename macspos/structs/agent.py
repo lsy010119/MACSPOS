@@ -1,4 +1,4 @@
-
+from macspos.structs.waypoint import WayPoint
 
 
 class Agent:
@@ -24,7 +24,7 @@ class Agent:
         """
 
         self.id          = id
-        self.waypoints   = waypoints
+        self.waypoints   = self._array2WPlist(waypoints)
         self.N           = len(self.waypoints)
         self.lengths     = []
 
@@ -32,6 +32,21 @@ class Agent:
         self.pos         = []
         self.vel         = []
     
+
+    def _array2WPlist(self, waypoints):
+
+        N = len(waypoints.T)
+
+        wplist = [0]*N
+
+        for i in range(N):
+
+            wp = WayPoint( id = self.id, loc = [waypoints[0,i],waypoints[1,i]])
+
+            wplist[i] = wp
+
+        return wplist
+
 
     def _calLengths(self):
 
