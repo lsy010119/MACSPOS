@@ -1,1 +1,1 @@
-from numpy import array, zeros, ones, 
+from numpy import array, zeros, ones
