@@ -162,7 +162,6 @@ def insert_cp(agents):
 
                     cases, loc = _check_cp(wp_11,wp_12,wp_21,wp_22)
 
-                    print(cases,loc)
 
                     if cases == 0:
 

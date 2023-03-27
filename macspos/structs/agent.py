@@ -1,3 +1,5 @@
+from numpy import array, zeros
+from numpy.linalg import norm
 from macspos.structs.waypoint import WayPoint
 
 
@@ -25,13 +27,14 @@ class Agent:
 
         self.id          = id
         self.waypoints   = self._array2WPlist(waypoints)
-        self.N           = len(self.waypoints)
-        self.lengths     = []
+        self.N           = -1
+        self.lengths     = -1
 
+        self.pos         = -1
+        self.vel         = -1
 
-        self.pos         = []
-        self.vel         = []
-    
+        self.updateData()    
+
 
     def _array2WPlist(self, waypoints):
 
@@ -41,7 +44,7 @@ class Agent:
 
         for i in range(N):
 
-            wp = WayPoint( id = self.id, loc = [waypoints[0,i],waypoints[1,i]])
+            wp = WayPoint( id = self.id, loc = array([waypoints[0,i],waypoints[1,i]]))
 
             wplist[i] = wp
 
@@ -50,7 +53,11 @@ class Agent:
 
     def _calLengths(self):
 
-        pass
+        self.lengths = zeros((self.N-1,1))
+
+        for i in range(self.N-1):
+
+            self.lengths[i] = norm(self.waypoints[i].loc - self.waypoints[i+1].loc)
 
 
     def _reCountWayPoints(self):
@@ -65,3 +72,4 @@ class Agent:
     def updateData(self):
 
         self._reCountWayPoints()
+        self._calLengths()
