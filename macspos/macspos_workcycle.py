@@ -1,6 +1,8 @@
 from threading import Thread
-from time      import sleep
+import time
 
+from macspos.lib.admm import ADMM
+from macspos.lib.waypoint_handlers  import *
 
 class MACSPOSWC(Thread):
 
@@ -10,6 +12,8 @@ class MACSPOSWC(Thread):
 
         self.sharedmemory = sharedmemory
 
+        self.admm = ADMM(self.sharedmemory)
+
         super().__init__()
         self.daemon = True
         self.start()
@@ -18,7 +22,6 @@ class MACSPOSWC(Thread):
 
     def run(self):
 
-        i = 0
 
         while True: 
 
@@ -27,11 +30,18 @@ class MACSPOSWC(Thread):
                 self.sharedmemory.FLAG_run = False
                 
                 print("WC start")
+                
+                start = time.time()
+
                 #### calculate vel profile ####
-                self.sharedmemory.agents += 0.5
-                
-                sleep(0.5)
-                
-                
+                self.admm.run()                
+
+                end = time.time()
+
+                print(end-start)
+
+                self.sharedmemory.update()
+
                 print("WC done")
+
 

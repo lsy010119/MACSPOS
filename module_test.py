@@ -7,20 +7,30 @@ import macspos as ms
 
 
 
-wp1 = array([[1,2,3,4,5,6],
-             [2,3,4,5,6,7]])
+wp1 = array([[0,2,4,6],
+             [0,2,4,6]])
 
 agent1 = ms.Agent(id = 0, waypoints = wp1)
 
-macspos_lc = ms.MACSPOS(1,1)
+wp2 = array([[6,4,2,0],
+             [0,2,4,6]])
+
+agent2 = ms.Agent(id = 1, waypoints = wp2)
+
+agents = [agent1,agent2]
+
+wp3 = array([[3,3,3,3],
+             [6,4,2,0]])
+
+agent3 = ms.Agent(id = 2, waypoints = wp3)
+
+agents = [agent1,agent2,agent3]
 
 
-i = 0
 
-while i < 100: 
+macspos_lc = ms.MACSPOS(0,agents)
 
-    i += 1
 
-    sleep(1)
+while True:
 
-    print("main : ",macspos_lc.sharedmemory.agents)
+    sleep(0.1)

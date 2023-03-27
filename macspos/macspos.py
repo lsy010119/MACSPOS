@@ -26,14 +26,11 @@ class MACSPOS(Thread):
 
     def run(self):
 
-        i = 0
 
-        while i < 100: 
+        while True: 
 
-            i += 1
-
-            sleep(1)
-
-            print("macspos : ",i)
+            print("macspos")
 
             self.sharedmemory.FLAG_run = True
+
+            sleep(self.sharedmemory.period_replan)
