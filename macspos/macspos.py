@@ -33,4 +33,5 @@ class MACSPOS(Thread):
 
             self.sharedmemory.FLAG_run = True
 
-            sleep(self.sharedmemory.period_replan)
+            sleep(10)
+            # sleep(self.sharedmemory.period_replan)

@@ -26,10 +26,10 @@ class SharedMemory:
         self.N_c            = -1              # the number of the collision points
 
         ### Constraints ###
-        self.v_min          = -1            # minimum velocity
-        self.v_max          = -1            # maximum velocity
-        self.d_safe         = -1           # safety distance
-        self.t_safe         = -1           # safety time difference
+        self.v_min          = 1            # minimum velocity
+        self.v_max          = 10            # maximum velocity
+        self.d_safe         =  3            # safety distance
+        self.t_safe         = self.d_safe/self.v_max            # safety time difference
         
         ### Constants ###
         self.cps            = -1              # collision points
