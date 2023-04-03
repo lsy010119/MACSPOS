@@ -1,5 +1,6 @@
 from numpy import array, zeros, ones, eye, block, diag, tril, where, arange
 from numpy.linalg import inv, norm
+from time           import sleep
 
 import matplotlib.pyplot as plt
 
@@ -93,7 +94,7 @@ class ADMM:
 
             d[self.base_idx[i] - i :   self.base_idx[i] + self.agents[i].N - i - 1] = \
             self.agents[i].lengths
-
+        
 
         ### Q ###
 
@@ -141,33 +142,41 @@ class ADMM:
                    [zeros((self.N_c,1))],
                    [self.t_st]])
 
-
-        return P,q,A,B,C,c,d
+        return P,q,S_1,S_2,S_3,d,t_st
     
 
-    def _calc_cost_function(self, P,q,A,B,C,c,d, t,s,x,w, p):
+    def _calc_cost_function(self, P,q,S_1,S_2,S_3,d,t_st, t,s,x, p):
 
-        J = t.T@P@t + q.T@t + (p/2)*((A@t + B@s + C@x - c + w).T@(A@t + B@s + C@x - c + w) - w.T@w)
+        J = t.T@P@t + q.T@t
 
-        r = A@t + B@s + C@x - c + w
+        r1 = norm(S_1@t + s)
+        r2 = norm(S_2@t - x)
+        r3 = norm(S_3@t - t_st)
+
+        r = array([r1,r2,r3])
 
         return J,r
         
 
-    def _update_t(self, P,q,A,B,C,c,d, s,x,w, p):
+    def _update_t(self, P,q,S_1,S_2,S_3,d,t_st, s,x,w1,w2,w3, p):
 
-        t = - inv(P + (p/2)*A.T@A) @ (q.T + p*(B@s + C@x - c + w).T@A).T
+        A = block([[S_1],[S_2],[S_3]])
+
+        b = block([[-s + w1],[-x+w2],[-t_st+w3]])
+
+        print("s",s)
+        print("w1",w1)
+
+        t = - inv(P + (p/2)*A.T@A) @ (0.5*(q + p*A.T@b))
 
         return t
 
 
-    def _update_s(self, P,q,A,B,C,c,d, t,x,w, p):
+    def _update_s(self, P,q,S_1,S_2,S_3,d,t_st, t,x,w1,w2,w3, p):
 
-        S_1 = A[ : self.N - self.K, : ]
-        c1  = c[ : self.N - self.K, : ]
-        w1  = w[ : self.N - self.K, : ]
-
-        s = -S_1@t + c1 - w1
+        s = S_1@t + w1
+        print(w1)
+        print(-S_1@t + d/self.v_min)
 
         ### projection ###
 
@@ -175,21 +184,21 @@ class ADMM:
 
             s_i = s[i]
 
-            if s_i < 0:
+            if s_i < d[i]/self.v_min:
 
-                s[i] = 0
+                s[i] = d[i]/self.v_min
 
-            elif s_i > d[i]/self.v_min - d[i]/self.v_max:
+            elif s_i > d[i]/self.v_max:
+                
+                print("si = ",d[i]/self.v_min - d[i]/self.v_max)
+                s[i] = d[i]/self.v_max
 
-                s[i] = d[i]/self.v_min - d[i]/self.v_max
+        print(s)
 
         return s
     
 
-    def _update_x(self, P,q,A,B,C,c,d, t,s,w, p):
-    
-        S_2 = A[ self.N - self.K : self.N - self.K + self.N_c, : ]
-        w2  = w[ self.N - self.K : self.N - self.K + self.N_c, : ]
+    def _update_x(self, P,q,S_1,S_2,S_3,d,t_st, t,s,w1,w2,w3, p):
     
         x   = S_2@t + w2
 
@@ -199,6 +208,7 @@ class ADMM:
 
             x_i = x[i]
 
+
             if abs(x_i) < self.t_safe and x_i >= 0:
 
                 x[i] = self.t_safe
@@ -207,14 +217,21 @@ class ADMM:
 
                 x[i] = -self.t_safe
 
+            print(x_i,"->",x[i])
+
         return x
 
 
-    def _update_w(self, P,q,A,B,C,c,d, t,s,x,w, p):
+    def _update_w(self, P,q,S_1,S_2,S_3,d,t_st, t,s,x,w1,w2,w3, p):
 
-        w = w + A@t + B@s + C@x - c
+        w1 = w1 + S_1@t - s
+        
+        w2 = w2 + S_2@t - x
+        
+        w3 = w3 + S_3@t - t_st
+        
 
-        return w
+        return w1,w2,w3
 
 
     def run(self):
@@ -227,71 +244,89 @@ class ADMM:
                      x E D 
         '''
         ### step size ###
-        p = 10
-        max_iter = 10
+        p        = 100
+        max_iter = 100
 
         ### update coefficient matrices ###
-        P,q,A,B,C,c,d = self._calc_coeff_matrices()
+        P,q,S_1,S_2,S_3,d,t_st = self._calc_coeff_matrices()
         
         ### init optimization variables ###
         t_c   = zeros((self.N,            1))
         s_c   = zeros((self.N - self.K,   1))
         x_c   = zeros((self.N_c,          1))
-        w_c   = zeros((self.N + self.N_c, 1))
+
+        w1_c  = zeros((self.N - self.K,   1))
+        w2_c  = zeros((self.N_c,          1))
+        w3_c  = zeros((self.K,            1))
         
         t_p   = t_c
         s_p   = s_c
         x_p   = x_c
-        w_p   = w_c
+
+        w1_p   = w1_c
+        w2_p   = w2_c
+        w3_p   = w3_c
 
         ### init cost ###
-        J_c,r_c = self._calc_cost_function(P,q,A,B,C,c,d,t_p,s_p,x_p,w_p,p)
-        J_p,r_p = J_c,r_c
+        J_c,r_c = self._calc_cost_function(P,q,S_1,S_2,S_3,d,t_st, t_c,s_c,x_c, p)
 
-        ### init logging stuffs ###
         iter = 0
 
-        r_c_list = zeros((self.N + self.N_c,max_iter))
-        con1_list = zeros((self.N - self.K,max_iter))
-        con2_list = zeros((self.N_c,max_iter))
-        con3_list = zeros((self.K,max_iter))
+        J_list = zeros(max_iter)
+        r_list = zeros((3, max_iter))
+
 
         for i in range(max_iter):
 
+            print("======")
+            print(t_c,"\n")
+            print(s_c,"\n")
+            print(x_c,"\n")
+            print(S_1@t_c,"\n")
+            print(S_2@t_c,"\n")
+            print(S_3@t_c,"\n")
+
+
+
             ### update variables ###
 
-            t_c = self._update_t(P,q,A,B,C,c,d,  s_p,x_p,w_p,      p)
-            s_c = self._update_s(P,q,A,B,C,c,d,  t_c,x_p,w_p,      p)
-            x_c = self._update_x(P,q,A,B,C,c,d,  t_c,s_c,w_p,      p)
-            w_c = self._update_w(P,q,A,B,C,c,d,  t_c,s_c,x_c,w_p,  p)
+            t_c = self._update_t(P,q,S_1,S_2,S_3,d,t_st,    s_p,x_p,w1_p,w2_p,w3_p, p)
+            s_c = self._update_s(P,q,S_1,S_2,S_3,d,t_st,    t_c,x_p,w1_p,w2_p,w3_p, p)
+            x_c = self._update_x(P,q,S_1,S_2,S_3,d,t_st,    t_c,s_c,w1_p,w2_p,w3_p, p)
+            
+            w1_c,w2_c,w3_c = self._update_w(P,q,S_1,S_2,S_3,d,t_st,    t_c,s_c,x_c,w1_p,w2_p,w3_p, p)
 
             ### update cost ###
             J_p,r_p = J_c,r_c
-            J_c,r_c = self._calc_cost_function(P,q,A,B,C,c,d,t_c,s_c,x_c,w_c,p)
+            J_c,r_c = self._calc_cost_function(P,q,S_1,S_2,S_3,d,t_st, t_c,s_c,x_c, p)
 
-            r_c_list[:,i] = r_c[:,0]
-            con1_list[:,i:i+1] = A[ : self.N - self.K, : ]@t_c
-            con2_list[:,i:i+1] = A[ self.N - self.K : self.N - self.K + self.N_c, : ]@t_c
-            con3_list[:,i:i+1] = A[ -self.K:, : ]@t_c
+            J_list[i]   = J_c
+            r_list[:,i] = r_c
             
+            # print(w2_c)
+
+            # print(w1_c,w2_c,w3_c)
+
             ### stopping criterion ###
-            if 0 < norm(J_p) - norm(J_c) < 0.01*norm(J_p):
+            # if 0 < J_p - J_c < 0.01*J_p:
 
-                print("converged")
+            #     print("converged")
 
-                break
+            #     break
 
-            ### update variables ###
             t_p   = t_c
             s_p   = s_c
             x_p   = x_c
-            w_p   = w_c
+
+            w1_p   = w1_c
+            w2_p   = w2_c
+            w3_p   = w3_c
 
             iter += 1
 
+            # sleep(0.1)
 
-        # plt.plot(arange(iter),r_c_list[:,:iter].T)
-        plt.plot(arange(iter),con1_list[:,:iter].T)
-        # plt.plot(arange(iter),con2_list[:,:iter].T)
-        # plt.plot(arange(iter),con3_list[:,:iter].T)
+        plt.plot(arange(iter),r_list[0,:iter].T,label="residual")
+        # plt.plot(arange(iter),J_list[:iter],label="J")
+        plt.legend()
         plt.show()
