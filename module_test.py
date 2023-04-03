@@ -1,10 +1,7 @@
-from numpy import array
+from numpy import array,zeros
 from time  import sleep
 
 import macspos as ms
-
-
-
 
 
 wp1 = array([[0,2,4,6],
@@ -28,7 +25,10 @@ agents = [agent1,agent2,agent3]
 
 
 
-macspos_lc = ms.MACSPOS(0,agents)
+macspos_lc = ms.MACSPOS(agents, \
+                        v_min = 0.1, v_max = 0.3, d_safe = 3, \
+                        t_st = zeros((3,1)), \
+                        period_replan = 2, split_interval = 0)
 
 
 while True:

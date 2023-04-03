@@ -30,6 +30,9 @@ class Agent:
         self.N           = -1
         self.lengths     = -1
 
+        self.t_prf       = -1
+        self.v_prf       = -1
+
         self.pos         = -1
         self.vel         = -1
 
