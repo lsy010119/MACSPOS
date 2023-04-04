@@ -34,9 +34,9 @@ class MACSPOSWC(Thread):
 
         while True: 
 
-            if self.sharedmemory.FLAG_run:
+            if self.sharedmemory.FLAG_runadmm:
 
-                self.sharedmemory.FLAG_run = False
+                self.sharedmemory.FLAG_runadmm = False
                 
                 print("WC start")
                 
@@ -50,9 +50,7 @@ class MACSPOSWC(Thread):
                 print(f"ADMM Runtime : {end-start} sec")
 
                 ### visualize ###
-
-                
-
+                '''
                 traj.cla()
                 velc.cla()
 
@@ -88,8 +86,13 @@ class MACSPOSWC(Thread):
 
                 self.sharedmemory.update()
 
-                print("WC done")
 
                 plt.pause(0.001)
+                '''
+                print("WC done")
+
+
+
+
 
         plt.show()

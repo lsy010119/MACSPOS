@@ -6,9 +6,10 @@ from macspos.lib.waypoint_handlers  import insert_cp
 class SharedMemory:
 
 
-    def __init__(self, agents, v_min, v_max, d_safe, t_st, period_replan, split_interval ):        
+    def __init__(self, agents, v_min, v_max, d_safe, t_st, period_replan, period_predhr ,split_interval ):        
 
         self.period_replan      = period_replan
+        self.period_predhr      = period_predhr
         self.split_interval     = split_interval
 
         ### Agents ###
@@ -36,7 +37,8 @@ class SharedMemory:
         self.cp_time_residual   = -1
 
         ### Flags ###
-        self.FLAG_run           = False
+        self.FLAG_runadmm       = False
+        self.FLAG_cntrlin        = False
 
         self.update()
 

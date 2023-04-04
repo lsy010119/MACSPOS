@@ -344,7 +344,7 @@ class ADMM:
             # print(w1_c,w2_c,w3_c)
 
             ### stopping criterion ###
-            if 0 < J_p - J_c < 0.001*J_p:
+            if 0 < J_p - J_c < 0.01*J_p:
 
                 print("converged")
 
@@ -368,9 +368,9 @@ class ADMM:
             agent.t_prf = t_set
             agent.v_prf = v_set
 
-            print(f"{id}'th Agent's Initial Time : \n{t_set[0]}")
+            # print(f"{id}'th Agent's Initial Time : \n{t_set[0]}")
 
-            print(f"{id}'th Agent's Velocity Profile : \n{v_set}")
+            # print(f"{id}'th Agent's Velocity Profile : \n{v_set}")
 
 
         for i,cp in enumerate(self.cps):
@@ -386,7 +386,7 @@ class ADMM:
 
             self.sharedmemory.cp_time_residual[i] = (agent_id_i , agent_id_j, t_i, t_j)
 
-            print(f"Collision Point Time Difference : \n{abs(t_i - t_j)}")
+            # print(f"Collision Point Time Difference : \n{abs(t_i - t_j)}")
 
             
 

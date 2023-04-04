@@ -9,10 +9,10 @@ class MACSPOS(Thread):
 
 
 
-    def __init__(self, agents, v_min, v_max, d_safe, t_st, period_replan, split_interval):
+    def __init__(self, agents, v_min, v_max, d_safe, t_st, period_replan, period_predhr, split_interval):
 
 
-        self.sharedmemory = SharedMemory(agents, v_min, v_max, d_safe, t_st, period_replan, split_interval)
+        self.sharedmemory = SharedMemory(agents, v_min, v_max, d_safe, t_st, period_replan, period_predhr, split_interval)
         workcycle         = MACSPOSWC(self.sharedmemory)
 
 
@@ -31,7 +31,11 @@ class MACSPOS(Thread):
 
             print("macspos")
 
-            self.sharedmemory.FLAG_run = True
+            self.sharedmemory.FLAG_runadmm = True
+
+            # sleep(self.sharedmemory.period_predhr)
+
+            self.sharedmemory.FLAG_cntrlin = True
 
             # sleep(60)
             sleep(self.sharedmemory.period_replan)
