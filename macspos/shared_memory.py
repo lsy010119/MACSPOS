@@ -38,7 +38,11 @@ class SharedMemory:
 
         ### Flags ###
         self.FLAG_runadmm       = False
-        self.FLAG_cntrlin        = False
+        self.FLAG_ctrlin        = False
+
+        ### Timers ###
+        self.TIME_startctrl     = 0
+
 
         self.update()
 

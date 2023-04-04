@@ -1,5 +1,5 @@
 from threading import Thread
-from time      import sleep
+from time      import sleep,time
 
 from macspos.shared_memory      import SharedMemory
 from macspos.macspos_workcycle  import MACSPOSWC
@@ -31,11 +31,22 @@ class MACSPOS(Thread):
 
             print("macspos")
 
+            t1 = time()
+
             self.sharedmemory.FLAG_runadmm = True
 
-            # sleep(self.sharedmemory.period_predhr)
+            sleep(self.sharedmemory.period_predhr)
 
-            self.sharedmemory.FLAG_cntrlin = True
+            t2 = time()
 
-            # sleep(60)
-            sleep(self.sharedmemory.period_replan)
+            self.sharedmemory.FLAG_ctrlin = True
+
+            self.sharedmemory.TIME_startctrl = time()
+
+            sleep(self.sharedmemory.period_replan-self.sharedmemory.period_predhr)
+
+            t3 = time()
+
+
+            # print("planning",t2-t1)
+            # print("ctrl to admm",t3-t2)
