@@ -168,9 +168,6 @@ class ADMM:
 
         J_c = t.T@self.P@t + self.q.T@t
 
-        # r1 = norm(self.S_1@t - s)
-        # r2 = norm(self.S_2@t - x)
-        # r3 = norm(self.S_3@t - self.t_st)
         r1 = norm(self.w1_c)
         r2 = norm(self.w2_c)
         r3 = norm(self.w3_c)
@@ -196,8 +193,6 @@ class ADMM:
         self.t_p = deepcopy(self.t_c)
         self.t_c = - inv(self.P + (self.p/2)*A.T@A) @ (0.5*(self.q + self.p*A.T@b))
 
-        # print("t : \n",s,"->\n",self.s_c)
-
 
     def _update_s(self):
 
@@ -206,9 +201,6 @@ class ADMM:
         w1  = deepcopy(self.w1_p)
 
         s = self.S_1@t + w1
-
-        # print(w1)
-        # print(-self.S_1@t + self.d/self.v_min)
 
         ### projection ###
 
@@ -223,8 +215,6 @@ class ADMM:
             elif s_i < self.d[i]/self.v_max:
                 
                 s[i] = self.d[i]/self.v_max
-
-        # print("s : \n",s,"->\n",self.s_c)
 
         self.s_p = deepcopy(self.s_c)
         self.s_c = s
@@ -252,8 +242,6 @@ class ADMM:
 
                 x[i] = -self.t_safe
 
-        # print("x : \n",x,"->\n",self.x_c)
-
         self.x_p = deepcopy(self.x_c)
         self.x_c = x
 
@@ -274,10 +262,6 @@ class ADMM:
         
         w3_c = w3 + self.S_3@t - self.t_st
         
-        # print("w1 : \n",w1,"->\n",w1_c)
-        # print("w2 : \n",w2,"->\n",w2_c)
-        # print("w3 : \n",w3,"->\n",w3_c)
-
         self.w1_p,self.w2_p,self.w3_p = deepcopy(self.w1_c),deepcopy(self.w2_c),deepcopy(self.w3_c)
         self.w1_c,self.w2_c,self.w3_c = w1_c,w2_c,w3_c
 
@@ -292,7 +276,7 @@ class ADMM:
                      x E D 
         '''
         ### step size ###
-        p        = 1000000
+        p        = 100
         max_iter = 1000
 
         ### update coefficient matrices ###
@@ -351,6 +335,8 @@ class ADMM:
 
         ### Return Results ###
 
+        self.sharedmemory.t = deepcopy(self.t_c)
+
         for agent in self.sharedmemory.agents:
 
             t_set = deepcopy(self.t_c[self.base_idx[agent.id]:self.base_idx[agent.id]+agent.N])
@@ -377,4 +363,6 @@ class ADMM:
             t_j = self.t_c[self.base_idx[agent_id_j] + wp_idx_j]
 
             self.sharedmemory.cp_time_residual[i] = (agent_id_i , agent_id_j, t_i, t_j)
+
+
 

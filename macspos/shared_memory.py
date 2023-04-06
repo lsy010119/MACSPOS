@@ -33,9 +33,6 @@ class SharedMemory:
         self.cps                = -1                        # collision points
         self.t_st               = t_st                      # starting time
         
-        ### ADMM Results ###
-        self.cp_time_residual   = -1
-
         ### Flags ###
         self.FLAG_runadmm       = False
         self.FLAG_ctrlin        = False
@@ -43,6 +40,9 @@ class SharedMemory:
         ### Timers ###
         self.TIME_startctrl     = 0
 
+        ### Optimization Results ###
+        self.t                  = -1
+        self.cp_time_residual   = -1
 
         self.update()
 
