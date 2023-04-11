@@ -44,7 +44,7 @@ class MACSPOSWC(Thread):
 
                 predict_posvel(self.sharedmemory.agents,self.sharedmemory.period_replan, self.sharedmemory.period_predhr)
 
-                self.sharedmemory.update()
+                # self.sharedmemory.update()
 
 
                 # print("WC done")

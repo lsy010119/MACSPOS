@@ -15,7 +15,7 @@ def predict_posvel(agents, period_replan, period_predhr):
 
         ### count passed wp ###
         t_set = agent.t_prf
-
+        
         passing_segment = where(t_set > period_replan - period_predhr)[0][0] - 1
 
 

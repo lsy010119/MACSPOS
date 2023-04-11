@@ -145,7 +145,7 @@ class ADMM:
 
         ### Coeff Matrices ###
 
-        self.P = Q.T@Q
+        self.P = 500* Q.T@Q
 
 
     def _calc_cost_function(self):
@@ -362,7 +362,7 @@ class ADMM:
             t_i = self.t_c[self.base_idx[agent_id_i] + wp_idx_i]
             t_j = self.t_c[self.base_idx[agent_id_j] + wp_idx_j]
 
-            self.sharedmemory.cp_time_residual[i] = (agent_id_i , agent_id_j, t_i, t_j)
+            self.sharedmemory.cp_time_residual[i] = (agent_id_i , agent_id_j, wp_idx_i, wp_idx_j, t_i, t_j)
 
-
+            print(self.sharedmemory.cp_time_residual[i])
 

@@ -1,4 +1,4 @@
-from numpy import array, zeros
+from numpy import array, zeros, arange, vstack, hstack
 from numpy.linalg import norm
 from macspos.structs.waypoint import WayPoint
 
@@ -76,3 +76,44 @@ class Agent:
 
         self._reCountWayPoints()
         self._calLengths()
+
+
+    def calculate_trajec(self, delt):
+
+        traj = zeros((2,1))
+
+        del_t = self.t_prf[1:] - self.t_prf[:-1]
+
+        for k in range(self.N - 1):
+
+            wp_k1 = self.waypoints[k].loc
+            wp_k2 = self.waypoints[k+1].loc
+
+            del_xk = ( wp_k2[0] - wp_k1[0] ) / ( del_t[k] / delt )
+            del_yk = ( wp_k2[1] - wp_k1[1] ) / ( del_t[k] / delt )
+
+
+            if del_xk != 0 and del_yk == 0:     # for case moving horizontally
+
+                traj_xk = arange( wp_k1[0], wp_k2[0], del_xk ) 
+                traj_yk = zeros(len(traj_xk)) + wp_k1[1]
+
+
+            elif del_xk == 0 and del_yk != 0:   # for case moving vertically
+
+                traj_yk = arange( wp_k1[1], wp_k2[1], del_yk ) 
+                traj_xk = zeros(len(traj_yk)) + wp_k1[0]
+
+
+            else:                               # for other cases
+                traj_xk = arange( wp_k1[0], wp_k2[0], del_xk ) 
+                traj_yk = arange( wp_k1[1], wp_k2[1], del_yk ) 
+
+
+            traj_k = vstack(( traj_xk, traj_yk ))
+
+            traj = hstack((traj,traj_k))
+
+        traj = traj[:,1:]
+
+        return traj
