@@ -3,8 +3,6 @@ from copy   import deepcopy
 from macspos.structs.agent      import Agent
 from macspos.structs.waypoint   import WayPoint
 
-import matplotlib.pyplot as plt
-
 
 def _check_cp(wp_11, wp_12, wp_21, wp_22):
     """

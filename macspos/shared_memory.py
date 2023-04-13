@@ -70,5 +70,7 @@ class SharedMemory:
 
             if agent.N > self.N_max: self.N_max = agent.N
 
+        print(f"N : ",self.N)
+
 
         

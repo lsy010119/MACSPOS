@@ -3,6 +3,7 @@ from time      import sleep,time
 
 from macspos.shared_memory      import SharedMemory
 from macspos.macspos_workcycle  import MACSPOSWC
+from macspos.macspos_viz        import MACSPOSViz
 from macspos.lib.admm           import ADMM
 
 
@@ -10,12 +11,16 @@ class MACSPOS(Thread):
 
 
 
-    def __init__(self, agents, v_min, v_max, d_safe, t_st, period_replan, period_predhr, split_interval):
+    def __init__(self, agents, v_min, v_max, d_safe, t_st, period_replan, period_predhr, split_interval, simparams=-1):
+
+        self.simparams    = simparams
 
         self.sharedmemory = SharedMemory(agents, v_min, v_max, d_safe, t_st, period_replan, period_predhr, split_interval)
         self.admm         = ADMM(self.sharedmemory)
-        self.workcycle    = MACSPOSWC(self.sharedmemory,self.admm)
-                
+        self.workcycle    = MACSPOSWC(self.sharedmemory,self.admm,self.simparams)
+        self.vizcycle     = MACSPOSViz(self.sharedmemory)
+
+
         super().__init__()
         self.daemon = True
         self.start()
@@ -23,10 +28,13 @@ class MACSPOS(Thread):
 
     def run(self):
 
+        while not all(self.simparams.FLAG_initialized):
+
+            sleep(0.001)
+
+        print("MACSPOS : Started")
 
         while True: 
-
-            print("macspos")
 
             t1 = time()
 

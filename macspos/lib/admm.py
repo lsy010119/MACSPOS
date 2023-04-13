@@ -12,24 +12,13 @@ class ADMM:
 
     def __init__(self, sharedmemory):
 
-        self.sharedmemory = sharedmemory
-
-        ### Agents ###
-        self.agents         = sharedmemory.agents           # a list of Agents
-
-        ### Agent number ###
-        self.K              = sharedmemory.K                # the number of the agents
-
-        ### Waypoint number ###
-        self.N              = sharedmemory.N                # sum of the nuber of waypoints
-        self.N_max          = sharedmemory.N_max            # the maximum of the nummber of waypoints
-        self.N_c            = sharedmemory.N_c              # the number of the collision points
+        self.sm             = sharedmemory
 
         ### Constraints ###
-        self.v_min          = sharedmemory.v_min            # minimum velocity
-        self.v_max          = sharedmemory.v_max            # maximum velocity
-        self.d_safe         = sharedmemory.d_safe           # safety distance
-        self.t_safe         = sharedmemory.t_safe           # safety time difference
+        self.v_min          = self.sm.v_min                 # minimum velocity
+        self.v_max          = self.sm.v_max                 # maximum velocity
+        self.d_safe         = self.sm.d_safe                # safety distance
+        self.t_safe         = self.sm.t_safe                # safety time difference
 
         ### Coefficient Matrices ###
         self.P              = -1                            # Cost quadratic term coeff matrix
@@ -57,17 +46,13 @@ class ADMM:
 
         ### Constants ###
         self.d              = -1                            # lengths of the semgents
-        self.t_st           = sharedmemory.t_st             # starting time
-
-        ### Collision Points ###
-        self.cps            = sharedmemory.cps              # collision points
-
+        self.t_st           = self.sm.t_st                  # starting time
 
         ### Code Optmization Stuffs ###
-        self.S = zeros((self.N_max-1,self.N_max))           # S_1 : for velocity constraints
-        self.S[:,:-1] += diag(-ones(self.N_max-1))
-        self.S[:,1:] += diag(ones(self.N_max-1))
-        self.base_idx = zeros(self.K, dtype=int)            # [0, N1, ... , sum(N1,...,NK-1)]
+        self.S = zeros((self.sm.N_max-1,self.sm.N_max))     # S_1 : for velocity constraints
+        self.S[:,:-1] += diag(-ones(self.sm.N_max-1))
+        self.S[:,1:] += diag(ones(self.sm.N_max-1))
+        self.base_idx = zeros(self.sm.K, dtype=int)         # [0, N1, ... , sum(N1,...,NK-1)]
 
 
 
@@ -75,63 +60,71 @@ class ADMM:
 
         N_sum = 0
 
-        for idx in range(self.K - 1):
+        for idx in range(self.sm.K - 1):
 
-            N_sum += self.agents[idx].N
+            N_sum += self.sm.agents[idx].N
 
             self.base_idx[idx+1] = N_sum
+
+            print("N_sum",N_sum)
+            print("N_i",self.sm.agents[idx].N)
 
 
     def _calc_coeff_matrices(self):
 
         self._calc_N_sum_list()
 
+        print(f"ADMM N : {self.sm.N}")
+
         ### Cost Function ###
-        Q = zeros((int(self.K*(self.K-1)/2),self.N))
-        self.q = zeros((self.N,1))
+        Q = zeros((int(self.sm.K*(self.sm.K-1)/2),self.sm.N))
+        self.q = zeros((self.sm.N,1))
 
         ### Coeff ###
-        self.d = zeros((self.N-self.K,1))
+        self.d = zeros((self.sm.N-self.sm.K,1))
 
         ### Constraints ###
-        self.S_1 = zeros((self.N-self.K, self.N))
-        self.S_2 = zeros((self.N_c, self.N))
-        self.S_3 = zeros((self.K, self.N))
+        self.S_1 = zeros((self.sm.N-self.sm.K, self.sm.N))
+        self.S_2 = zeros((self.sm.N_c, self.sm.N))
+        self.S_3 = zeros((self.sm.K, self.sm.N))
 
 
         ### q, d, S_1, S_3 ###
 
-        for i in range(self.K):
+        for i in range(self.sm.K):
 
-            self.q[ self.base_idx[i]+self.agents[i].N - 1, 0 ] = 1
+            self.q[ self.base_idx[i]+self.sm.agents[i].N - 1, 0 ] = 1
 
-            self.S_1[self.base_idx[i] - i    :   self.base_idx[i] + self.agents[i].N - i - 1, \
-                self.base_idx[i]        :   self.base_idx[i] + self.agents[i].N          ] = \
-            self.S[                     :   self.agents[i].N - 1,\
-                                        :   self.agents[i].N     ]
+            print("S_1",self.base_idx[i],self.sm.agents[i].N)
+
+
+            self.S_1[self.base_idx[i] - i    :   self.base_idx[i] + self.sm.agents[i].N - i - 1, \
+                self.base_idx[i]        :   self.base_idx[i] + self.sm.agents[i].N          ] = \
+            self.S[                     :   self.sm.agents[i].N - 1,\
+                                        :   self.sm.agents[i].N     ]
 
             self.S_3[i,self.base_idx[i]] = 1
 
-            self.d[self.base_idx[i] - i :   self.base_idx[i] + self.agents[i].N - i - 1] = \
-            self.agents[i].lengths
+            self.d[self.base_idx[i] - i :   self.base_idx[i] + self.sm.agents[i].N - i - 1] = \
+            self.sm.agents[i].lengths
         
 
         ### Q ###
 
         temp_i = 0
 
-        for i in range(self.K-1):            
-            for j in range(i+1,self.K):
+        for i in range(self.sm.K-1):            
+            for j in range(i+1,self.sm.K):
 
-                Q[temp_i,self.base_idx[i] + self.agents[i].N - 1] = 1
-                Q[temp_i,self.base_idx[j] + self.agents[j].N - 1] = -1
+                Q[temp_i,self.base_idx[i] + self.sm.agents[i].N - 1] = 1
+                Q[temp_i,self.base_idx[j] + self.sm.agents[j].N - 1] = -1
 
                 temp_i += 1
 
 
         ### S_2 ###
 
-        for idx,cp in enumerate(self.cps):
+        for idx,cp in enumerate(self.sm.cps):
 
             agent_id_i = cp[0].id
             agent_id_j = cp[1].id
@@ -146,6 +139,7 @@ class ADMM:
         ### Coeff Matrices ###
 
         self.P = 500* Q.T@Q
+
 
 
     def _calc_cost_function(self):
@@ -204,7 +198,7 @@ class ADMM:
 
         ### projection ###
 
-        for i in range(self.N-self.K):
+        for i in range(self.sm.N-self.sm.K):
 
             s_i = s[i]
 
@@ -229,7 +223,7 @@ class ADMM:
 
         ### projection ###
 
-        for i in range(self.N_c):
+        for i in range(self.sm.N_c):
 
             x_i = x[i]
 
@@ -283,13 +277,13 @@ class ADMM:
         self._calc_coeff_matrices()
         
         ### init optimization variables ###
-        self.t_c   = zeros((self.N,            1))
-        self.s_c   = zeros((self.N - self.K,   1))
-        self.x_c   = zeros((self.N_c,          1))
+        self.t_c   = zeros((self.sm.N,            1))
+        self.s_c   = zeros((self.sm.N - self.sm.K,   1))
+        self.x_c   = zeros((self.sm.N_c,          1))
 
-        self.w1_c  = zeros((self.N - self.K,   1))
-        self.w2_c  = zeros((self.N_c,          1))
-        self.w3_c  = zeros((self.K,            1))
+        self.w1_c  = zeros((self.sm.N - self.sm.K,   1))
+        self.w2_c  = zeros((self.sm.N_c,          1))
+        self.w3_c  = zeros((self.sm.K,            1))
         
         self.t_p   = deepcopy(self.t_c)
         self.s_p   = deepcopy(self.s_c)
@@ -335,9 +329,12 @@ class ADMM:
 
         ### Return Results ###
 
-        self.sharedmemory.t = deepcopy(self.t_c)
+        self.sm.t = deepcopy(self.t_c)
 
-        for agent in self.sharedmemory.agents:
+        print(f"time difference : {self.S_2@self.t_c}")
+        print(f"t_safe : {self.t_safe}")
+
+        for agent in self.sm.agents:
 
             t_set = deepcopy(self.t_c[self.base_idx[agent.id]:self.base_idx[agent.id]+agent.N])
 
@@ -351,7 +348,7 @@ class ADMM:
             agent.v_prf = v_set
 
 
-        for i,cp in enumerate(self.cps):
+        for i,cp in enumerate(self.sm.cps):
 
             agent_id_i = cp[0].id
             agent_id_j = cp[1].id
@@ -362,7 +359,5 @@ class ADMM:
             t_i = self.t_c[self.base_idx[agent_id_i] + wp_idx_i]
             t_j = self.t_c[self.base_idx[agent_id_j] + wp_idx_j]
 
-            self.sharedmemory.cp_time_residual[i] = (agent_id_i , agent_id_j, wp_idx_i, wp_idx_j, t_i, t_j)
-
-            print(self.sharedmemory.cp_time_residual[i])
+            self.sm.cp_time_residual[i] = (agent_id_i , agent_id_j, wp_idx_i, wp_idx_j, t_i, t_j)
 

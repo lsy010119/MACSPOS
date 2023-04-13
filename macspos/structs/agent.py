@@ -33,8 +33,10 @@ class Agent:
         self.t_prf       = -1
         self.v_prf       = -1
 
-        self.pos         = -1
-        self.vel         = -1
+        self.pos         = zeros(2)
+        self.vel         = zeros(2)
+
+        self.velin       = zeros(2)
 
         self.updateData()    
 
