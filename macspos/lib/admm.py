@@ -74,6 +74,14 @@ class ADMM:
 
         self._calc_N_sum_list()
 
+        for agent in self.sm.agents:
+            print(f"=== Agent.{agent.id} ===")
+            print("waypoints : ")
+            for wp in agent.waypoints:
+
+                print(f"{wp.loc}")
+
+
         print(f"ADMM N : {self.sm.N}")
 
         ### Cost Function ###
@@ -94,9 +102,6 @@ class ADMM:
         for i in range(self.sm.K):
 
             self.q[ self.base_idx[i]+self.sm.agents[i].N - 1, 0 ] = 1
-
-            print("S_1",self.base_idx[i],self.sm.agents[i].N)
-
 
             self.S_1[self.base_idx[i] - i    :   self.base_idx[i] + self.sm.agents[i].N - i - 1, \
                 self.base_idx[i]        :   self.base_idx[i] + self.sm.agents[i].N          ] = \

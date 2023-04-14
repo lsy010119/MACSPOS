@@ -51,6 +51,12 @@ class SharedMemory:
 
         ### update cps ###
 
+        print("waypoints bef insrt : ")
+        for agent in self.agents:
+            for wp in agent.waypoints:
+
+                print(f"{wp.loc}")
+        
         self.cps = insert_cp(self.agents)
 
         self.cp_time_residual = [0]*len(self.cps)
@@ -70,7 +76,8 @@ class SharedMemory:
 
             if agent.N > self.N_max: self.N_max = agent.N
 
-        print(f"N : ",self.N)
+            print(f"waypoints SM : \n")
+            
+            for wp in agent.waypoints:
 
-
-        
+                print(wp.loc)

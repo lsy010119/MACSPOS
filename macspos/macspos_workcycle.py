@@ -23,11 +23,10 @@ class MACSPOSWC(Thread):
 
     def run(self):
 
-        # fig = plt.figure()
-        # viz = fig.add_subplot(1,1,1)
         heading_wps = [1]*len(self.sharedmemory.agents)
 
         while True: 
+
 
             if self.sharedmemory.FLAG_runadmm:
 
@@ -37,6 +36,10 @@ class MACSPOSWC(Thread):
 
                 ### prediction ###
                 predict_posvel(self.sharedmemory.agents, self.sharedmemory.period_predhr, heading_wps)
+
+                print("++")
+
+                print(self.sharedmemory.agents[2])
 
                 self.sharedmemory.update()
                 # start = time()                    
@@ -48,18 +51,16 @@ class MACSPOSWC(Thread):
 
                 # print(f"ADMM Runtime : {end-start} sec")
 
-
-
                 # print("WC done")
+
 
             if self.sharedmemory.FLAG_ctrlin and all(self.simparams.FLAG_initialized):
 
                 ### control for replanning period ###
                 TIME_curr = time()
 
-                heading_wps = calc_velin(self.sharedmemory.agents, self.sharedmemory.TIME_startctrl)
+                heading_wps = calc_velin(self.sharedmemory.agents, self.sharedmemory.TIME_startctrl, self.simparams)
 
-                # print(v_in)
                 if TIME_curr - self.sharedmemory.TIME_startctrl >= self.sharedmemory.period_replan:
 
                     self.sharedmemory.FLAG_ctrlin = False
@@ -67,3 +68,6 @@ class MACSPOSWC(Thread):
                 # print("ctrl : ",TIME_curr - self.sharedmemory.TIME_startctrl)
 
                 sleep(0.0001)
+
+
+            

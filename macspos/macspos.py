@@ -18,7 +18,7 @@ class MACSPOS(Thread):
         self.sharedmemory = SharedMemory(agents, v_min, v_max, d_safe, t_st, period_replan, period_predhr, split_interval)
         self.admm         = ADMM(self.sharedmemory)
         self.workcycle    = MACSPOSWC(self.sharedmemory,self.admm,self.simparams)
-        self.vizcycle     = MACSPOSViz(self.sharedmemory)
+        self.vizcycle     = MACSPOSViz(self.sharedmemory,self.simparams)
 
 
         super().__init__()
@@ -31,6 +31,7 @@ class MACSPOS(Thread):
         while not all(self.simparams.FLAG_initialized):
 
             sleep(0.001)
+
 
         print("MACSPOS : Started")
 
@@ -49,6 +50,8 @@ class MACSPOS(Thread):
             self.sharedmemory.TIME_startctrl = time()
 
             sleep(self.sharedmemory.period_replan-self.sharedmemory.period_predhr)
+
+            self.sharedmemory.TIME_startctrl = time()
 
             t3 = time()
 

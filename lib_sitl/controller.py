@@ -65,7 +65,7 @@ class Controller:
 
         await agent.system.offboard.set_position_ned(\
             PositionNedYaw( pos_init[1]-self.simparams.spawn_loc[agent.id][1],\
-                            pos_init[0]-self.simparams.spawn_loc[agent.id][0],-10*(agent.id+1),0.0))
+                            pos_init[0]-self.simparams.spawn_loc[agent.id][0],-10,0.0))
         
         await asyncio.sleep(10)
 
@@ -83,6 +83,10 @@ class Controller:
             await agent.system.offboard.set_velocity_ned(VelocityNedYaw(velin[1],velin[0],0.0,0.0))
 
             await asyncio.sleep(0.01)
+
+        await agent.system.offboard.set_velocity_ned(VelocityNedYaw(0.0,0.0,0.0,0.0))
+        
+        await asyncio.sleep(0.01)
     
         # await agent.system.offboard.set_velocity_ned(VelocityNedYaw(0.0,0.0,-1.0,0.0))
         # await agent.system.offboard.set_position_ned(PositionNedYaw(0.0,0.0,-10.0*(agent.id+1),0.0))
