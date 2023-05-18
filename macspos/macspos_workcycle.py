@@ -37,10 +37,6 @@ class MACSPOSWC(Thread):
                 ### prediction ###
                 predict_posvel(self.sharedmemory.agents, self.sharedmemory.period_predhr, heading_wps)
 
-                print("++")
-
-                print(self.sharedmemory.agents[2])
-
                 self.sharedmemory.update()
                 # start = time()                    
 

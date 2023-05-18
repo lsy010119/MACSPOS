@@ -136,10 +136,10 @@ if __name__ == "__main__":
 
     wps             = [wp1,wp2,wp3]
     v_min           = 0.5
-    v_max           = 1.5
+    v_max           = 1.0
     d_s             = 4
     t_st            = zeros((3,1))
-    period_replan   = 2
+    period_replan   = 5
     period_predhr   = 0.1
 
     spawn_loc       = [array([3,0]),array([6,0]),array([9,0])]

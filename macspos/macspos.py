@@ -32,6 +32,7 @@ class MACSPOS(Thread):
 
             sleep(0.001)
 
+        sleep(3)
 
         print("MACSPOS : Started")
 

@@ -50,12 +50,6 @@ class SharedMemory:
     def update(self):
 
         ### update cps ###
-
-        print("waypoints bef insrt : ")
-        for agent in self.agents:
-            for wp in agent.waypoints:
-
-                print(f"{wp.loc}")
         
         self.cps = insert_cp(self.agents)
 
@@ -76,7 +70,7 @@ class SharedMemory:
 
             if agent.N > self.N_max: self.N_max = agent.N
 
-            print(f"waypoints SM : \n")
+            # print(f"waypoints SM : \n")
             
             for wp in agent.waypoints:
 

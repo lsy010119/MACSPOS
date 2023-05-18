@@ -1,3 +1,4 @@
+from copy import deepcopy
 from numpy import array, zeros, arange, vstack, hstack
 from numpy.linalg import norm
 from macspos.structs.waypoint import WayPoint
@@ -27,6 +28,7 @@ class Agent:
 
         self.id          = id
         self.waypoints   = self._array2WPlist(waypoints)
+        self.wps_origin  = deepcopy(self.waypoints)
         self.N           = -1
         self.lengths     = -1
 

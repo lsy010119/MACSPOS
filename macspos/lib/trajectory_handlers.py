@@ -22,6 +22,8 @@ def predict_posvel(agents, period_predhr, heading_wps):
 
         wp_0 = WayPoint(agent.id, deepcopy(agent.pos) + period_predhr*deepcopy(agent.vel))
 
+        print(f"Agent {agent.id}")
+
         print("waypoints bef : ")
         for wp in agent.waypoints:
 
@@ -66,28 +68,40 @@ def calc_velin(agents, TIME_startctrl, simparams):
 
         else:
 
-            try:
+            # try:
 
-                heading_wp = where(t_set > t_curr - TIME_startctrl)[0][0]
+            try: heading_wp = where(t_set > t_curr - TIME_startctrl)[0][0]
+            except: heading_wp = 1
 
-                # print("======================")
-                # print("t_set : \n",t_set)
-                # print("elepsed time : \n",t_curr - TIME_startctrl)
-                # print("heading waypoints : \n",heading_wp)
+            # print("======================")
+            # print("t_set : \n",t_set)
+            # print("elepsed time : \n",t_curr - TIME_startctrl)
+            # print("heading waypoints : \n",heading_wp)
 
-                heading_wps[agent.id] = heading_wp
+            for i in range(agent.N-1):
+                
+                try:    
+                    if agent.waypoints[heading_wp+i].is_cp:
 
-                v_des = agent.v_prf[heading_wp-1]
+                        heading_wp += 1
+                
+                except: break
 
-                agent.velin = v_des*(agent.waypoints[heading_wp].loc - agent.pos)/norm(agent.waypoints[heading_wp].loc - agent.pos)
+                else: break
 
-            except:
+            heading_wps[agent.id] = heading_wp
 
-                heading_wps[agent.id] = 0
+            v_des = agent.v_prf[heading_wp-1]
 
-                agent.velin = zeros(2)
+            agent.velin = v_des*(agent.waypoints[heading_wp].loc - agent.pos)/norm(agent.waypoints[heading_wp].loc - agent.pos)
 
-                simparams.FLAG_mission_done[agent.id] = True
+            # except:
+
+            #     heading_wps[agent.id] = 0
+
+            #     agent.velin = zeros(2)
+
+            #     simparams.FLAG_mission_done[agent.id] = True
 
         # print(heading_wp)
         # print(t_set, t_curr - TIME_startctrl)

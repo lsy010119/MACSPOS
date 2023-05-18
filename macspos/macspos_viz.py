@@ -23,19 +23,19 @@ class MACSPOSViz(Thread):
     def run(self):
 
         fig1 = plt.figure()
-        fig2 = plt.figure()
+        # fig2 = plt.figure()
         
 
         viz = fig1.add_subplot(1,1,1)
         
-        vel = fig2.add_subplot(2,1,1)
+        # vel = fig2.add_subplot(2,1,1)
 
 
         vel_list = zeros((3,len(self.sharedmemory.agents)))
 
         UAVcolors = ['blue', 'orchid', 'darkgreen', 'olive', 'teal', 'skyblue']
 
-        plt.pause(0.01)
+        # plt.pause(0.01)
 
         while not all(self.simparams.FLAG_initialized):
 
@@ -49,7 +49,7 @@ class MACSPOSViz(Thread):
 
 
             viz.cla()
-            vel.cla()
+            # vel.cla()
 
             vel_list = hstack((vel_list,zeros((3,1))))
 
@@ -74,11 +74,11 @@ class MACSPOSViz(Thread):
                 # viz.quiver(agent.pos[0],agent.pos[1], agent.vel[0],agent.vel[1])
                 viz.scatter(agent.pos[0],agent.pos[1])
 
-                vel.plot(range(len(vel_list[0])),vel_list[agent.id].T,color=UAVcolors[agent.id],label=f"Agent #{agent.id+1}")
-                vel.hlines(self.sharedmemory.v_min,-10,10000,linestyle='--',color='black',linewidth=2)
-                vel.hlines(self.sharedmemory.v_max,-10,10000,linestyle='--',color='black',linewidth=2)
-                vel.set_ylim(self.sharedmemory.v_min - 0.3, self.sharedmemory.v_max + 0.3)
-                vel.set_xlim(0, len(vel_list[0]))
+                # vel.plot(range(len(vel_list[0])),vel_list[agent.id].T,color=UAVcolors[agent.id],label=f"Agent #{agent.id+1}")
+                # vel.hlines(self.sharedmemory.v_min,-10,10000,linestyle='--',color='black',linewidth=2)
+                # vel.hlines(self.sharedmemory.v_max,-10,10000,linestyle='--',color='black',linewidth=2)
+                # vel.set_ylim(self.sharedmemory.v_min - 0.3, self.sharedmemory.v_max + 0.3)
+                # vel.set_xlim(0, len(vel_list[0]))
                 
                 # except: pass
 
@@ -88,9 +88,9 @@ class MACSPOSViz(Thread):
             viz.set_xlabel("x[m]",fontsize=15)
             viz.set_ylabel("y[m]",fontsize=15)
 
-            vel.set_ylabel("velocity [m/s]",fontsize=15)
-            vel.legend()
-            vel.grid()
+            # vel.set_ylabel("velocity [m/s]",fontsize=15)
+            # vel.legend()
+            # vel.grid()
 
             plt.pause(0.00001)
 
